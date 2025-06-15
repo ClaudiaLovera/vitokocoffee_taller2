@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 export default function Clientes() {
   // URL base de la API para clientes.
   // En desarrollo, CRA reenviará '/api/cliente' a 'http://localhost:3000/api/cliente'
-  const API = '/api/cliente';
+  const API = '/api/clientes';
 
   // Estado local del componente:
   // - clientes: arreglo con los datos de clientes obtenidos del servidor
@@ -26,7 +26,7 @@ export default function Clientes() {
     try {
       setError('');
       let url = API;
-      if (filter === '1' || filter === '2') url += `?type=${filter}`;
+      if (filter !== 'all') url += `?type=${filter}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(res.statusText);
       const data = await res.json();
@@ -73,7 +73,7 @@ export default function Clientes() {
       const payload = {
         nombre: form.nombre,
         ciudad: form.ciudad,
-        tipo:   parseInt(form.tipo, 10)
+        tipo: form.tipo
       };
       const res = await fetch(url, {
         method,
@@ -94,7 +94,8 @@ export default function Clientes() {
   const handleDelete = async id => {
     try {
       setError('');
-      const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+      console.log("Desactivando cliente con ID:", id);
+      const res = await fetch(`${API}/desactivar/${id}`, { method: 'PUT' });
       if (!res.ok) throw new Error(res.statusText);
       await loadClients();
     } catch (err) {
@@ -126,8 +127,8 @@ export default function Clientes() {
           className="border border-pink-300 rounded p-1 bg-pink-100"
         >
           <option value="all">Todos</option>
-          <option value="1">Normales</option>
-          <option value="2">Premium</option>
+          <option value="normal">Normales</option>
+          <option value="premium">Premium</option>
         </select>
         <button
           onClick={loadClients}
@@ -146,23 +147,23 @@ export default function Clientes() {
           </tr>
         </thead>
         <tbody>
-          {clientes.map(c => (
-            <tr key={c.id} className="border-t border-pink-200">
-              <td className="p-2">{c.id}</td>
+          {clientes.map((c, index) => (
+            <tr key={c.id_cliente || `cliente-${index}`} className="border-t border-pink-200">
+              <td className="p-2">{c.id_cliente}</td>
               <td className="p-2">{c.nombre}</td>
               <td className="p-2">{c.ciudad}</td>
               <td className="p-2">
-                {c.tipo === 1 ? 'Normal' : c.tipo === 2 ? 'Premium' : 'Inactivo'}
+                {c.tipo === 'normal' ? 'Normal' : c.tipo === 'premium' ? 'Premium' : 'Inactivo'}
               </td>
               <td className="p-2 space-x-1">
                 <button
                   onClick={() =>
-                    setForm({ id: c.id, nombre: c.nombre, ciudad: c.ciudad, tipo: c.tipo.toString() })
+                    setForm({ id: c.id_cliente, nombre: c.nombre, ciudad: c.ciudad, tipo: c.tipo.toString() })
                   }
                   className="px-2 py-1 bg-pink-300 text-white rounded hover:bg-pink-400"
                 >✎</button>
                 <button
-                  onClick={() => handleDelete(c.id)}
+                  onClick={() => handleDelete(c.id_cliente)}
                   className="px-2 py-1 bg-red-400 text-white rounded hover:bg-red-500"
                 >🗑</button>
               </td>
@@ -197,8 +198,8 @@ export default function Clientes() {
           className="border border-pink-300 rounded p-2 bg-white"
           required
         >
-          <option value="1">Normal</option>
-          <option value="2">Premium</option>
+          <option value="normal">Normal</option>
+          <option value="premium">Premium</option>
         </select>
         <button className="bg-pink-500 text-white py-2 rounded sm:col-span-4 hover:bg-pink-600">
           {form.id ? 'Actualizar Cliente' : 'Registrar Cliente'}

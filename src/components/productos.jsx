@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 export default function Productos() {
   // URL base de la API para productos.
   // Create React App reenviará '/api/producto' a 'http://localhost:3000/api/producto' en desarrollo.
-  const API = '/api/producto';
+  const API = '/api/productos';
 
   // Estado local del componente:
   // - productos: lista de productos disponibles
@@ -71,6 +71,15 @@ export default function Productos() {
     loadAvailable();
   }, []);
 
+  const formatoCLP = precio => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(precio);
+  };
+
   // 1 & 4. Maneja la creación (POST) o edición (PUT) de un producto según form.id.
   // Envía name, price y stock en el cuerpo de la petición.
   const handleSubmit = async e => {
@@ -117,7 +126,7 @@ export default function Productos() {
     if (!p) return;
     try {
       setError('');
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API}/${id}/precio`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ price: parseFloat(p) })
@@ -189,21 +198,21 @@ export default function Productos() {
         <tbody>
           {productos.map(p => (
             <tr key={p.id} className="border-t border-pink-200">
-              <td className="p-2">{p.id}</td>
-              <td className="p-2">{p.name}</td>
-              <td className="p-2">{p.price}</td>
+              <td className="p-2">{p.id_producto}</td>
+              <td className="p-2">{p.nombre}</td>
+              <td className="p-2">{formatoCLP(p.precio)}</td>
               <td className="p-2">{p.stock}</td>
               <td className="p-2 space-x-1">
                 <button
-                  onClick={() => handleUpdatePrice(p.id)}
+                  onClick={() => handleUpdatePrice(p.id_producto)}
                   className="px-2 py-1 bg-pink-300 text-white rounded hover:bg-pink-400"
                 >💲</button>
                 <button
-                  onClick={() => handleIncStock(p.id)}
+                  onClick={() => handleIncStock(p.id_producto)}
                   className="px-2 py-1 bg-green-400 text-white rounded hover:bg-green-500"
                 >➕</button>
                 <button
-                  onClick={() => handleDelete(p.id)}
+                  onClick={() => handleDelete(p.id_producto)}
                   className="px-2 py-1 bg-red-400 text-white rounded hover:bg-red-500"
                 >🗑</button>
               </td>
